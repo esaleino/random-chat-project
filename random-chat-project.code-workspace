@@ -1,0 +1,46 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+
+	"settings": {
+		"restoreTerminals.keepExistingTerminalsOpen": false,
+		"restoreTerminals.runOnStartup": true,
+		"restoreTerminals.terminals": [
+			{
+				"splitTerminals": [
+					{
+						"name": "Docker",
+						"commands": ["docker-compose ps"]
+					}
+				]
+			},
+			{
+				"splitTerminals": [
+					{
+						"name": "Git",
+						"commands": ["git status"]
+					}
+				]
+			},
+			{
+				"splitTerminals": [
+					{
+						"name": "Server",
+						"commands": ["cd server", "npm run dev"]
+					}
+				]
+			},
+			{
+				"splitTerminals": [
+					{
+						"name": "Client",
+						"commands": ["cd client", "npm run dev"]
+					}
+				]
+			}
+		]
+	}
+}
