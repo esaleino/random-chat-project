@@ -12,8 +12,8 @@
 			{
 				"splitTerminals": [
 					{
-						"name": "Docker",
-						"commands": ["docker-compose ps"]
+						"name": "Commands",
+						"commands": [""]
 					}
 				]
 			},
