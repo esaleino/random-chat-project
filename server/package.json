@@ -4,16 +4,19 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "npx tsc",
 		"start": "node dist/index.js",
-		"copyfiles": "copyfiles -u 1 ./public/*.html dist/public/",
-		"tester": "nodemon --help options",
-		"dev": "concurrently \"rimraf dist/public\" \"copyfiles -u 1 ./public/*.html dist/public/\" \"npx tsc --watch\" \"nodemon -q -r dotenv/config dist/index.js\""
+		"copy-files": "copyfiles -u 1 ./public/*.html dist/public/",
+		"clear-files": "rimraf dist/public",
+		"clear-and-copy": "npm run clear-files && npm run copy-files",
+		"dev": "concurrently \"npm run build\" \"npm run onchange\" \"nodemon -q -r dotenv/config dist/index.js\"",
+		"build": "npm run clear-files && npm run copy-files && npx tsc --watch",
+		"onchange": "onchange \"./public/*.html\" -- npm run clear-and-copy"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"cors": "^2.8.5",
 		"express": "^4.18.2",
 		"socket.io": "^4.7.2"
 	},
@@ -24,6 +27,7 @@
 		"copyfiles": "^2.4.1",
 		"dotenv": "^16.3.1",
 		"nodemon": "^3.0.1",
+		"onchange": "^7.1.0",
 		"rimraf": "^5.0.5",
 		"typescript": "^5.2.2"
 	}

@@ -2,17 +2,9 @@ import express, { Express, Request, Response } from 'express';
 import { Server } from 'socket.io';
 const app: Express = express();
 const http = require('http');
-const cors = require('cors');
-const port = process.env.PORT || 5000;
 const server = http.createServer(app);
-const io = new Server(server, {
-	cors: {
-		origin: '*',
-		methods: ['GET', 'POST']
-	}
-});
-
-app.use(cors());
+const port = process.env.PORT || 3000;
+const io = new Server(server);
 
 app.get('/', (req: Request, res: Response) => {
 	res.sendFile(__dirname + '/public/index.html');
@@ -20,17 +12,8 @@ app.get('/', (req: Request, res: Response) => {
 
 io.on('connection', (socket) => {
 	console.log('a user connected');
-	socket.emit('hello', 'user: ' + socket.id);
 });
-
-io.on('message', (msg) => {
-	console.log(msg);
-});
-
-io.on('disconnect', () => {
-	console.log('user disconnected');
-});
-
+console.log('aloha');
 server.listen(port, () => {
 	console.log(process.env.PORT);
 	console.log(new Date());
