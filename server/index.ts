@@ -1,5 +1,8 @@
 import express, { Express, Request, Response } from 'express';
 import { Server } from 'socket.io';
+const { PATHS } = require('./paths');
+const { nameGenerator } = require(PATHS.FILES.NAME_GENERATOR);
+const nameGen = nameGenerator();
 const app: Express = express();
 const http = require('http');
 const cors = require('cors');
@@ -18,17 +21,22 @@ app.get('/', (req: Request, res: Response) => {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
+io.on('connection', (socket) => {});
+
 io.on('connection', (socket) => {
-	console.log('a user connected');
-	socket.emit('hello', 'user: ' + socket.id);
-});
+	console.log('a user connected' + socket.id);
+	let name = nameGen.newName();
+	socket.emit('hello', 'user: ' + socket.id + ' name: ' + name);
 
-io.on('message', (msg) => {
-	console.log(msg);
-});
+	socket.on('message', (msg) => {
+		console.log(`Received: ${msg}`);
+		socket.emit('message', msg);
+		// Handle the received message as needed
+	});
 
-io.on('disconnect', () => {
-	console.log('user disconnected');
+	socket.on('disconnect', () => {
+		console.log('user disconnected' + socket.id);
+	});
 });
 
 server.listen(port, () => {

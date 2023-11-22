@@ -5,12 +5,12 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node dist/index.js",
-		"copy-files": "copyfiles -u 1 ./public/*.html dist/public/",
+		"copy-files": "copyfiles -u 1 ./public/* dist/public/",
 		"clear-files": "rimraf dist/public",
 		"clear-and-copy": "npm run clear-files && npm run copy-files",
 		"dev": "concurrently \"npm run build\" \"npm run onchange\" \"nodemon -q -r dotenv/config dist/index.js\"",
 		"build": "npm run clear-files && npm run copy-files && npx tsc --watch",
-		"onchange": "onchange \"./public/*.html\" -- npm run clear-and-copy"
+		"onchange": "onchange \"./public/*\" -- npm run clear-and-copy"
 	},
 	"keywords": [],
 	"author": "",
