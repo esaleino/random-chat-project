@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node dist/index.js",
+		"start": "node index.js",
 		"copy-files": "copyfiles -u 1 ./public/* dist/public/",
 		"clear-files": "rimraf dist/public",
 		"clear-and-copy": "npm run clear-files && npm run copy-files",

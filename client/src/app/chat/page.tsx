@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 
-const WebSocketPage = () => {
+export default function WebSocketPage() {
 	const [socket, setSocket] = useState<Socket | null>(null);
+	const [name, setName] = useState<string | null>(null);
 	const [message, setMessage] = useState('');
 	const [receivedMessage, setReceivedMessage] = useState('');
-	const [chatMessages, setChatMessages] = useState<string[]>([]);
+	const [chatMessages, setChatMessages] = useState<{ text: string; type: 'server' | 'user' }[]>([]);
+	const [inChat, setInChat] = useState<boolean>(false);
 	const connectSocket = () => {
 		// Check if a socket connection doesn't already exist
 		if (!socket || !socket.connected) {
@@ -19,13 +21,14 @@ const WebSocketPage = () => {
 			newSocket.on('hello', (msg) => {
 				console.log(`Received: ${msg}`);
 				setReceivedMessage(msg);
-				setChatMessages((prevMessages) => [...prevMessages, msg]);
+				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'server' }]);
+				setName(msg.replace('name: ', ''));
 			});
 
 			newSocket.on('message', (msg) => {
 				console.log(`Received: ${msg}`);
 				setReceivedMessage(msg);
-				setChatMessages((prevMessages) => [...prevMessages, msg]);
+				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'server' }]);
 			});
 
 			setSocket(newSocket);
@@ -46,9 +49,17 @@ const WebSocketPage = () => {
 		};
 	}, [socket]);
 
+	const enterChat = () => {
+		if (socket) {
+			socket.emit('enterChat');
+			setInChat(true);
+		}
+	};
+
 	const handleSendMessage = () => {
 		if (socket) {
 			socket.emit('message', message);
+			setChatMessages((prevMessages) => [...prevMessages, { text: message, type: 'user' }]);
 			setMessage(''); // Clear the textbox after sending
 		}
 	};
@@ -66,30 +77,41 @@ const WebSocketPage = () => {
 		<div>
 			<button onClick={connectSocket}>Connect Socket</button>
 			<button onClick={disconnectSocket}>Disconnect Socket</button>
+			<button onClick={enterChat} disabled={!name}>
+				{' '}
+				{inChat ? 'Already in Chat' : 'Enter Chat'}
+			</button>
 			<br />
 			<div
 				style={{
 					border: '1px solid #ccc',
 					minHeight: '200px',
 					padding: '10px',
-					marginBottom: '10px'
+					marginBottom: '10px',
+					display: 'flex',
+					flexDirection: 'column'
 				}}
 			>
 				{chatMessages.map((msg, index) => (
-					<div key={index}>{msg}</div>
+					<div
+						key={index}
+						style={{
+							alignSelf: msg.type === 'server' ? 'flex-start' : 'flex-end',
+							backgroundColor: msg.type === 'server' ? '#d3d3d3' : '#5bc0de',
+							padding: '5px 10px',
+							borderRadius: '10px',
+							marginBottom: '5px'
+						}}
+					>
+						{msg.text}
+					</div>
 				))}
 			</div>
-			<input
-				type='text'
-				value={message}
-				onChange={(e) => setMessage(e.target.value)}
-			/>
+			<input type='text' value={message} onChange={(e) => setMessage(e.target.value)} />
 			<button onClick={handleSendMessage}>Send Message</button>
 			<button onClick={handleClearChat}>Clear Chat</button>
 			<br />
 			<div>Last Received Message: {receivedMessage}</div>
 		</div>
 	);
-};
-
-export default WebSocketPage;
+}
