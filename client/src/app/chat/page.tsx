@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 
 export default function WebSocketPage() {
+	const serverAddress = process.env.SERVER_ADDRESS || 'http://localhost:5000';
 	const [socket, setSocket] = useState<Socket | null>(null);
 	const [name, setName] = useState<string | null>(null);
 	const [message, setMessage] = useState('');
@@ -12,7 +13,7 @@ export default function WebSocketPage() {
 	const connectSocket = () => {
 		// Check if a socket connection doesn't already exist
 		if (!socket || !socket.connected) {
-			const newSocket = io('http://localhost:5000');
+			const newSocket = io(serverAddress);
 
 			newSocket.on('connect', () => {
 				console.log('Connected to Socket.IO server');
