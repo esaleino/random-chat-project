@@ -18,9 +18,7 @@ const io = new Server(server, {
 const chatPool = new Map();
 let poolCounter = 1;
 const MAX_POOLS = 10;
-const chatNameSet = new Set(
-	Array.from({ length: MAX_POOLS }, (_, i) => `Chat-${i + 1}`)
-);
+const chatNameSet = new Set(Array.from({ length: MAX_POOLS }, (_, i) => `Chat-${i + 1}`));
 const connectedUsers = new Map<string, string>();
 app.use(cors());
 
@@ -28,21 +26,23 @@ app.get('/', (req: Request, res: Response) => {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
-/* setInterval(() => {
-	console.log('chatPool', chatPool);
-	console.log('chatNameSet', chatNameSet);
-	console.log('connectedUsers', connectedUsers);
-}, 10000); */
-
 io.on('connection', (socket) => {
 	console.log('a user connected' + socket.id);
 	let userName = nameGen.newName();
 	connectedUsers.set(socket.id, userName);
 	socket.emit('hello', `name: ${userName}`);
+
 	socket.on('message', (msg) => {
 		console.log(`Received from ${userName}: ${msg}`);
+		const pool = findPool(socket.id);
 
-		// Broadcast the message to users in the chat pool
+		if (!pool) {
+			console.log('User is not in a chat pool');
+			// User is not in a chat pool, handle the error
+			socket.emit('cerror', 'You cannot send a message without being in a chat pool.');
+			return;
+		}
+
 		for (const userId of chatPool.get(findPool(socket.id))) {
 			if (typeof userId === 'string' && userId !== socket.id) {
 				io.to(userId).emit('message', `${userName}: ${msg}`);
@@ -70,15 +70,28 @@ io.on('connection', (socket) => {
 		console.log('user disconnected' + socket.id);
 		const pool = findPool(socket.id);
 		if (pool) {
-			io.to(pool).emit(
-				'message',
-				`${userName} has left the chat, closing chat room`
-			);
+			io.to(pool).emit('userLeft', `${userName} has left the chat, closing chat room`);
 			chatNameSet.add(pool);
 			console.log(chatNameSet);
 			chatPool.delete(pool);
 		}
 		connectedUsers.delete(socket.id);
+	});
+
+	socket.on('leaveChat', () => {
+		console.log(`${userName} left the chat`);
+		const pool = findPool(socket.id);
+		if (pool) {
+			const usersInPool = chatPool.get(pool);
+			usersInPool.delete(socket.id);
+			const remainingUser = Array.from(usersInPool)[0] as string | undefined;
+			socket.emit('userLeft', `You have left the chat, closing chat room`);
+			if (remainingUser) {
+				io.to(remainingUser).emit('userLeft', `${userName} has left the chat, closing chat room`);
+			}
+			chatNameSet.add(pool);
+			chatPool.delete(pool);
+		}
 	});
 });
 
@@ -92,13 +105,15 @@ server.listen(port, () => {
 function getPool(id: string) {
 	let pool: string | undefined;
 	let message: string | undefined;
-	let debug;
+	let debug: string | undefined;
 	// Find existing pool
 	for (const [poolId, users] of chatPool) {
 		if (users.size < 2 && !users.has(id)) {
 			pool = poolId;
 			debug = users;
-			message = 'Found a pool, you are now chatting with' + users[0] + '!';
+			let chatterId = Array.from(users).join(', ');
+			let userName = connectedUsers.get(chatterId);
+			message = 'Found a pool, you are now chatting with: ' + userName + '!';
 			break;
 		}
 	}
@@ -125,3 +140,8 @@ function findPool(id: string) {
 	}
 	return undefined;
 }
+
+setInterval(() => {
+	console.log('chatPool', chatPool);
+	console.log('connectedUsers', connectedUsers);
+}, 10000);

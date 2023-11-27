@@ -3,3 +3,5 @@
 node_modules
 client-old
 random-chat-project.code-workspace
+deploy*.ps1
+*.old*

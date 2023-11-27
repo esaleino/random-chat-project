@@ -1,7 +1,7 @@
 FROM node:21.2.0 AS server
-WORKDIR /app/server
-COPY server/package*.json ./
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
-COPY server/dist/ .
+COPY dist/ .
 EXPOSE 5000
 CMD ["npm", "start"]

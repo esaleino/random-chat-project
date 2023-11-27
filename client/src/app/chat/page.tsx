@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 
 export default function WebSocketPage() {
-	const serverAddress = process.env.SERVER_ADDRESS || 'http://localhost:5000';
+	const serverAddress = process.env.NEXT_PUBLIC_API_URL || 'localhost:5000';
 	const [socket, setSocket] = useState<Socket | null>(null);
 	const [name, setName] = useState<string | null>(null);
 	const [message, setMessage] = useState('');
 	const [receivedMessage, setReceivedMessage] = useState('');
-	const [chatMessages, setChatMessages] = useState<{ text: string; type: 'server' | 'user' }[]>([]);
+	const [chatMessages, setChatMessages] = useState<{ text: string; type: 'server' | 'user' | 'error' }[]>([]);
 	const [inChat, setInChat] = useState<boolean>(false);
 	const connectSocket = () => {
 		// Check if a socket connection doesn't already exist
@@ -23,13 +23,33 @@ export default function WebSocketPage() {
 				console.log(`Received: ${msg}`);
 				setReceivedMessage(msg);
 				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'server' }]);
-				setName(msg.replace('name: ', ''));
+				setName(msg.replace('You are chatting as: ', ''));
 			});
 
 			newSocket.on('message', (msg) => {
 				console.log(`Received: ${msg}`);
 				setReceivedMessage(msg);
 				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'server' }]);
+			});
+
+			newSocket.on('cerror', (msg) => {
+				console.log(`Error: ${msg}`);
+				setReceivedMessage(msg);
+				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'error' }]);
+			});
+
+			newSocket.on('userLeft', (msg) => {
+				setInChat(false);
+				console.log(`User Left: ${msg}`);
+				setReceivedMessage(msg);
+				setChatMessages((prevMessages) => [...prevMessages, { text: msg, type: 'server' }]);
+			});
+
+			newSocket.on('disconnect', () => {
+				setInChat(false);
+				console.log('Disconnected from Socket.IO server');
+				setReceivedMessage('Disconnected from server.');
+				setChatMessages((prevMessages) => [...prevMessages, { text: 'Disconnected from chat.', type: 'error' }]);
 			});
 
 			setSocket(newSocket);
@@ -52,6 +72,8 @@ export default function WebSocketPage() {
 
 	const enterChat = () => {
 		if (socket) {
+			handleClearChat();
+			console.log('API_URL:', serverAddress);
 			socket.emit('enterChat');
 			setInChat(true);
 		}
@@ -73,7 +95,12 @@ export default function WebSocketPage() {
 			console.log('Disconnected from Socket.IO server');
 		}
 	};
-
+	const leaveChat = () => {
+		if (socket) {
+			socket.emit('leaveChat');
+			setInChat(false);
+		}
+	};
 	return (
 		<div>
 			<button onClick={connectSocket}>Connect Socket</button>
@@ -81,6 +108,10 @@ export default function WebSocketPage() {
 			<button onClick={enterChat} disabled={!name}>
 				{' '}
 				{inChat ? 'Already in Chat' : 'Enter Chat'}
+			</button>
+			<button onClick={leaveChat} disabled={!inChat}>
+				{' '}
+				{inChat ? 'Leave Chat' : 'Not in Chat'}
 			</button>
 			<br />
 			<div
@@ -97,8 +128,8 @@ export default function WebSocketPage() {
 					<div
 						key={index}
 						style={{
-							alignSelf: msg.type === 'server' ? 'flex-start' : 'flex-end',
-							backgroundColor: msg.type === 'server' ? '#d3d3d3' : '#5bc0de',
+							alignSelf: msg.type === 'server' ? 'flex-start' : msg.type === 'error' ? 'flex-start' : 'flex-end',
+							backgroundColor: msg.type === 'server' ? '#d3d3d3' : msg.type === 'error' ? 'red' : '#5bc0de',
 							padding: '5px 10px',
 							borderRadius: '10px',
 							marginBottom: '5px'
