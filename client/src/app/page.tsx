@@ -1,12 +1,5 @@
-import Link from 'next/link';
+import { Alert } from 'flowbite-react';
 
 export default function Home() {
-	return (
-		<div>
-			<h1>Welcome to the Chat App</h1>
-			<p>
-				Get started by <Link href='/chat'>joining the chat</Link>!
-			</p>
-		</div>
-	);
+	return <Alert color='info'>Alert!</Alert>;
 }
