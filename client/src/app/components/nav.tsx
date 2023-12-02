@@ -31,7 +31,7 @@ const MyNavbar = () => {
 					<Navbar.Link href='/' className={`${navbarLinkClass}`}>
 						About
 					</Navbar.Link>
-					<Navbar.Link href='/' className={`${navbarLinkClass}`}>
+					<Navbar.Link href='/login' className={`${navbarLinkClass}`}>
 						Login
 					</Navbar.Link>
 					<Navbar.Link href='/register' className={`${navbarLinkClass}`}>

@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { TextInput, Button, Label } from 'flowbite-react';
 import { Form as Formclasses } from '../components/styles';
-
+import { useRouter } from 'next/navigation';
 const RegistrationForm = () => {
-	const serverAddress = process.env.NEXT_PUBLIC_API_URL || 'localhost:5000';
+	const router = useRouter();
+	const serverAddress =
+		process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 	const [formData, setFormData] = useState({
 		username: '',
 		email: '',
@@ -21,24 +23,27 @@ const RegistrationForm = () => {
 		e.preventDefault();
 		console.log(formData);
 		try {
-			const response = await fetch(`${serverAddress}/api/register`, {
+			console.log(`${serverAddress}/api/auth/register`);
+			const response = await fetch(`${serverAddress}/api/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(formData)
 			});
 
 			if (response.ok) {
-				const data = await response.json();
-				console.log(data);
+				console.log('Error');
+				router.push('/login');
 			} else {
 				console.log('Error');
+				const errorData = await response.json();
+				console.error(errorData);
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (error: any) {
+			console.log(error.message);
 		}
 	};
 	return (
-		<form onSubmit={handleSubmit} className={Formclasses.container}>
+		<form onSubmit={handleSubmit} className={Formclasses.container.large}>
 			<div className={Formclasses.formBlock}>
 				<div>
 					<Label htmlFor='firstName' className={Formclasses.label}>
@@ -120,8 +125,7 @@ const RegistrationForm = () => {
 				/>
 			</div>
 			<Button type='submit' className={Formclasses.button}>
-				{' '}
-				Register{' '}
+				Register
 			</Button>
 		</form>
 	);

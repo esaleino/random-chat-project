@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import bodyParser from 'body-parser';
 import { Server } from 'socket.io';
 const { PATHS } = require('./paths');
 import authRoutes from './src/routes/authRoutes';
@@ -16,7 +17,7 @@ const io = new Server(server, {
 });
 handleSocketConnection(io);
 app.use(cors());
-
+app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 
 server.listen(port, () => {
