@@ -1,6 +1,5 @@
 import fs from 'fs';
-import path from 'path';
-import { PATHS } from '../paths';
+const { PATHS } = require('../../paths');
 
 const nameGenerator = () => {
 	const data = JSON.parse(fs.readFileSync(PATHS.FILES.NAME_CONFIG, 'utf8'));
