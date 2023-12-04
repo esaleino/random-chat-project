@@ -25,7 +25,7 @@ const handleSocketConnection = (io: Server) => {
 				// User is not in a chat pool, handle the error
 				socket.emit(
 					'cerror',
-					'You cannot send a message without being in a chat pool.'
+					'You sent a message but you are not in a chat room.'
 				);
 				return;
 			}
@@ -41,15 +41,18 @@ const handleSocketConnection = (io: Server) => {
 			console.log(`${userName} entered the chat`);
 			//do logic
 			if (findPool(socket.id) !== undefined) {
-				socket.emit(
-					'message',
-					`${userName}, dear sir/madam/thing, you are already in a chat, please conserve your energy and wait for someone to join you`
-				);
+				socket.emit('message', `${userName}, you are already in a chat room.`);
 			} else {
 				const result = getPool(socket.id);
 				socket.join(result.pool);
 				console.log(result.debug);
 				socket.emit('message', `${result.message}`);
+				if (result.chatterId) {
+					io.to(result.chatterId).emit(
+						'message',
+						`${userName} has joined the chat`
+					);
+				}
 			}
 		});
 
@@ -93,14 +96,15 @@ function getPool(id: string) {
 	let pool: string | undefined;
 	let message: string | undefined;
 	let debug: string | undefined;
+	let chatterId: string | undefined;
 	// Find existing pool
 	for (const [poolId, users] of chatPool) {
 		if (users.size < 2 && !users.has(id)) {
 			pool = poolId;
 			debug = users;
-			let chatterId = Array.from(users).join(', ');
+			chatterId = Array.from(users).join(', ');
 			let userName = connectedUsers.get(chatterId);
-			message = 'Found a pool, you are now chatting with: ' + userName + '!';
+			message = 'Found a room, you are now chatting with: ' + userName + '!';
 			break;
 		}
 	}
@@ -116,7 +120,7 @@ function getPool(id: string) {
 	}
 	const usersInPool = chatPool.get(pool);
 	usersInPool.add(id);
-	return { pool, message, debug };
+	return { pool, message, debug, chatterId };
 }
 
 function findPool(id: string) {

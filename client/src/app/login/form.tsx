@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { TextInput, Button, Label } from 'flowbite-react';
 import { Form as Formclasses } from '../components/styles';
+import { getCookie } from '../components/cookies';
 const LoginForm = () => {
 	const serverAddress =
 		process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -13,7 +14,7 @@ const LoginForm = () => {
 		const { name, value } = e.target;
 		setFormData({ ...formData, [name]: value });
 	};
-	const handleSubmit = async (e: any) => {
+	const HandleSubmit = async (e: any) => {
 		e.preventDefault();
 		console.log('Login');
 		console.log(formData);
@@ -21,10 +22,11 @@ const LoginForm = () => {
 			const response = await fetch(`${serverAddress}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(formData)
+				body: JSON.stringify(formData),
+				credentials: 'include'
 			});
 			if (response.ok) {
-				console.log('Success');
+				console.log('Success', getCookie('user'));
 			} else {
 				console.log('Error');
 			}
@@ -33,7 +35,7 @@ const LoginForm = () => {
 		}
 	};
 	return (
-		<form onSubmit={handleSubmit} className={Formclasses.container.small}>
+		<form onSubmit={HandleSubmit} className={Formclasses.container.small}>
 			<div className={Formclasses.formRow}>
 				<Label htmlFor='username' className={Formclasses.label}>
 					Username
