@@ -5,7 +5,9 @@ import { Button, Textarea } from 'flowbite-react';
 import { useAuth } from '../components/authContext';
 
 export default function ChatComponent() {
-	const serverAddress = process.env.NEXT_PUBLIC_API_URL || 'localhost:5000';
+	const serverAddress =
+		process.env.NEXT_PUBLIC_API_URL ||
+		'https://random-chat-server-c36gamjyjq-lz.a.run.app';
 	console.log('API_URL:', serverAddress);
 	const [socket, setSocket] = useState<Socket | null>(null);
 	const [name, setName] = useState<string | null>(null);
@@ -17,6 +19,13 @@ export default function ChatComponent() {
 	const { isLoggedIn } = useAuth();
 	const [connected, setConnected] = useState<boolean>(false);
 	console.log('in', inChat);
+	const closeSocket = useCallback(() => {
+		if (socket && socket.connected) {
+			socket.disconnect();
+			setSocket(null);
+			setConnected(false);
+		}
+	}, [socket]);
 	const connectSocket = useCallback(() => {
 		if (!socket || !socket.connected) {
 			const newSocket = io(serverAddress);
@@ -83,14 +92,16 @@ export default function ChatComponent() {
 		if (!connected) {
 			connectSocket();
 			setConnected(true);
+			closeSocket();
 		}
-		return () => {
+		/* return () => {
 			if (socket && socket.connected) {
 				socket.disconnect();
 				setSocket(null);
+				setConnected(false);
 			}
-		};
-	}, [isLoggedIn, connectSocket, connected, socket]);
+		}; */
+	}, [isLoggedIn, connectSocket, closeSocket, connected, socket]);
 
 	const enterChat = () => {
 		if (socket) {
@@ -189,7 +200,10 @@ export default function ChatComponent() {
 				</Button>
 			</div>
 			<div className='flex flex-row justify-between'>
-				<div>
+				<div className='flex flex-row'>
+					<Button onClick={connectSocket} disabled={connected}>
+						Connect to Server
+					</Button>
 					<Button onClick={handleClearChat}>Clear Chat</Button>
 				</div>
 				<div className='flex flex-row'>

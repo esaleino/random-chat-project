@@ -6,7 +6,8 @@ import { getCookie } from '../components/cookies';
 import { useRouter } from 'next/navigation';
 const LoginForm = () => {
 	const serverAddress =
-		process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+		process.env.NEXT_PUBLIC_API_URL ||
+		'https://random-chat-server-c36gamjyjq-lz.a.run.app';
 	const [formData, setFormData] = useState({
 		username: '',
 		password: ''

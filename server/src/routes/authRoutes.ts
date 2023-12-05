@@ -22,7 +22,8 @@ router.post('/login', async (req, res) => {
 		.then((data: any) => {
 			req.session.user = data as UserSession;
 			res.cookie('user', JSON.stringify(req.session.user), {
-				secure: true
+				secure: true,
+				sameSite: 'none'
 			});
 			res.status(200).send();
 		})
