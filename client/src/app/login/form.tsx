@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { TextInput, Button, Label } from 'flowbite-react';
 import { Form as Formclasses } from '../components/styles';
 import { getCookie } from '../components/cookies';
+import { useRouter } from 'next/navigation';
 const LoginForm = () => {
 	const serverAddress =
 		process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -10,6 +11,7 @@ const LoginForm = () => {
 		username: '',
 		password: ''
 	});
+	const router = useRouter();
 	const handleInputChange = (e: any) => {
 		const { name, value } = e.target;
 		setFormData({ ...formData, [name]: value });
@@ -27,6 +29,7 @@ const LoginForm = () => {
 			});
 			if (response.ok) {
 				console.log('Success', getCookie('user'));
+				router.push('/chat');
 			} else {
 				console.log('Error');
 			}

@@ -1,7 +1,6 @@
 'use client';
 import { Suspense, useEffect } from 'react';
 import { getCookie, removeCookie } from './cookies';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Navbar, Flowbite, Dropdown } from 'flowbite-react'; // Adjust the import path based on your actual file structure
 import dynamic from 'next/dynamic';
@@ -68,13 +67,6 @@ const MyNavbar = () => {
 				className='bg-primaryLight dark:bg-primaryDark'
 			>
 				<Navbar.Brand href='/'>
-					<Image
-						src='https://flowbite.com/docs/images/logo.svg'
-						className='mr-3 h-6 sm:h-9'
-						width='50'
-						height='50'
-						alt='Flowbite Logo'
-					/>
 					<span className='self-center whitespace-nowrap text-xl font-semibold text-white'>
 						Random Chat
 					</span>

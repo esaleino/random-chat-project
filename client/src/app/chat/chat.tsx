@@ -6,6 +6,7 @@ import { useAuth } from '../components/authContext';
 
 export default function ChatComponent() {
 	const serverAddress = process.env.NEXT_PUBLIC_API_URL || 'localhost:5000';
+	console.log('API_URL:', serverAddress);
 	const [socket, setSocket] = useState<Socket | null>(null);
 	const [name, setName] = useState<string | null>(null);
 	const [message, setMessage] = useState('');
@@ -21,6 +22,8 @@ export default function ChatComponent() {
 			const newSocket = io(serverAddress);
 
 			newSocket.on('hello', (msg) => {
+				console.log(name);
+				console.log(receivedMessage);
 				console.log(`Received: ${msg}`);
 				setReceivedMessage(msg);
 				setChatMessages((prevMessages) => [
@@ -70,14 +73,14 @@ export default function ChatComponent() {
 
 			setSocket(newSocket);
 		}
-	}, [socket, serverAddress]);
+	}, [socket, name, receivedMessage, serverAddress]);
 
 	const handleClearChat = () => {
 		setChatMessages([]); // Clear the chat messages
 	};
 
 	useEffect(() => {
-		if (isLoggedIn && !connected) {
+		if (!connected) {
 			connectSocket();
 			setConnected(true);
 		}
